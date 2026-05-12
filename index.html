@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GrowOS — Intelligent Plant Care Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --soil-black: #0D0D0B;
+  --bark-dark: #1A1A14;
+  --moss-deep: #1C2E1A;
+  --leaf-glow: #72FF6A;
+  --pollen-gold: #E8C547;
+  --clay-red: #B5481F;
+  --mist-white: #F0EDE4;
+  --root-brown: #5C3D1E;
+  --water-blue: #3A9BD5;
+  --fert-amber: #D4822A;
+  --text-dim: #7A7A6A;
+  --border-dim: rgba(114,255,106,0.15);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+
+body{
+  background:var(--soil-black);
+  color:var(--mist-white);
+  font-family:'Lora',serif;
+  overflow-x:hidden;
+  cursor:default;
+}
+
+/* ── CUSTOM SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bark-dark);}
+::-webkit-scrollbar-thumb{background:var(--leaf-glow);border-radius:2px;}
+
+/* ── PARTICLES CANVAS ── */
+#particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.35;}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 48px;
+  border-bottom:1px solid var(--border-dim);
+  backdrop-filter:blur(12px);
+  background:rgba(13,13,11,0.85);
+}
+.nav-logo{
+  font-family:'Playfair Display',serif;
+  font-size:22px;font-weight:900;
+  color:var(--leaf-glow);
+  letter-spacing:-0.5px;
+  display:flex;align-items:center;gap:8px;
+}
+.nav-logo span{font-size:18px;}
+.nav-links{display:flex;gap:32px;list-style:none;}
+.nav-links a{
+  font-family:'DM Mono',monospace;font-size:12px;
+  color:var(--text-dim);text-decoration:none;
+  letter-spacing:1.5px;text-transform:uppercase;
+  transition:color 0.3s;
+}
+.nav-links a:hover{color:var(--leaf-glow);}
+.nav-cta{
+  font-family:'DM Mono',monospace;font-size:12px;
+  letter-spacing:1.5px;text-transform:uppercase;
+  background:transparent;
+  border:1px solid var(--leaf-glow);
+  color:var(--leaf-glow);
+  padding:10px 24px;cursor:pointer;
+  transition:all 0.3s;
+}
+.nav-cta:hover{background:var(--leaf-glow);color:var(--soil-black);}
+
+/* ── ANIMATIONS ── */
+@keyframes growUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(114,255,106,0.3);}50%{box-shadow:0 0 0 8px rgba(114,255,106,0);}}
+@keyframes slideRight{from{opacity:0;transform:translateX(-20px);}to{opacity:1;transform:translateX(0);}}
+@keyframes glow{0%,100%{text-shadow:0 0 20px rgba(114,255,106,0.4);}50%{text-shadow:0 0 40px rgba(114,255,106,0.8),0 0 80px rgba(114,255,106,0.2);}}
+@keyframes barGrow{from{width:0;}to{width:var(--target-w);}}
+@keyframes notifSlide{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
+
+.anim-1{animation:growUp 0.7s ease forwards;}
+.anim-2{animation:growUp 0.7s 0.15s ease forwards;opacity:0;}
+.anim-3{animation:growUp 0.7s 0.3s ease forwards;opacity:0;}
+.anim-4{animation:growUp 0.7s 0.45s ease forwards;opacity:0;}
+.anim-5{animation:growUp 0.7s 0.6s ease forwards;opacity:0;}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:120px 48px 80px;
+  position:relative;z-index:1;
+}
+.hero-eyebrow{
+  font-family:'DM Mono',monospace;font-size:11px;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--leaf-glow);margin-bottom:24px;
+  display:flex;align-items:center;gap:12px;
+}
+.hero-eyebrow::before{content:'';width:40px;height:1px;background:var(--leaf-glow);}
+.hero h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(52px,7vw,96px);
+  font-weight:900;line-height:1.0;
+  color:var(--mist-white);
+  animation:glow 4s ease-in-out infinite;
+  max-width:900px;margin-bottom:12px;
+}
+.hero h1 em{color:var(--leaf-glow);font-style:normal;}
+.hero-sub{
+  font-family:'Lora',serif;font-size:18px;
+  color:var(--text-dim);max-width:500px;
+  line-height:1.8;margin-bottom:48px;
+}
+.hero-actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
+.btn-primary{
+  font-family:'DM Mono',monospace;font-size:13px;
+  letter-spacing:1px;text-transform:uppercase;
+  background:var(--leaf-glow);color:var(--soil-black);
+  border:none;padding:16px 36px;cursor:pointer;
+  font-weight:500;transition:all 0.3s;
+  animation:pulse 3s ease-in-out infinite;
+}
+.btn-primary:hover{background:var(--mist-white);transform:translateY(-2px);}
+.btn-ghost{
+  font-family:'DM Mono',monospace;font-size:13px;
+  letter-spacing:1px;text-transform:uppercase;
+  background:transparent;color:var(--mist-white);
+  border:1px solid rgba(240,237,228,0.3);
+  padding:16px 36px;cursor:pointer;transition:all 0.3s;
+}
+.btn-ghost:hover{border-color:var(--mist-white);}
+
+.hero-stats{
+  display:flex;gap:48px;margin-top:80px;
+  padding-top:48px;border-top:1px solid var(--border-dim);
+}
+.hero-stat-num{
+  font-family:'Playfair Display',serif;font-size:36px;font-weight:700;
+  color:var(--leaf-glow);
+}
+.hero-stat-label{
+  font-family:'DM Mono',monospace;font-size:11px;
+  letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);
+  margin-top:4px;
+}
+
+/* ── SECTION COMMON ── */
+section{position:relative;z-index:1;}
+.section-label{
+  font-family:'DM Mono',monospace;font-size:11px;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--leaf-glow);margin-bottom:16px;
+  display:flex;align-items:center;gap:12px;
+}
+.section-label::before{content:'';width:24px;height:1px;background:var(--leaf-glow);}
+.section-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(32px,4vw,52px);font-weight:700;
+  color:var(--mist-white);line-height:1.15;margin-bottom:16px;
+}
+.section-desc{
+  font-family:'Lora',serif;font-size:16px;
+  color:var(--text-dim);line-height:1.9;max-width:520px;
+}
+
+/* ── DIAGONAL DIVIDER ── */
+.diag{
+  width:100%;height:80px;
+  background:var(--bark-dark);
+  clip-path:polygon(0 0,100% 40%,100% 100%,0 100%);
+  margin-top:-1px;
+}
+.diag-rev{
+  width:100%;height:80px;
+  background:var(--moss-deep);
+  clip-path:polygon(0 40%,100% 0,100% 100%,0 100%);
+  margin-top:-1px;
+}
+
+/* ── HOW IT WORKS ── */
+.how-section{background:var(--bark-dark);padding:100px 48px;}
+.steps-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:2px;margin-top:60px;
+}
+.step-card{
+  background:var(--soil-black);
+  padding:40px 32px;border-top:2px solid transparent;
+  transition:all 0.4s;position:relative;overflow:hidden;
+}
+.step-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--leaf-glow);transform:scaleX(0);transform-origin:left;
+  transition:transform 0.4s ease;
+}
+.step-card:hover::after{transform:scaleX(1);}
+.step-card:hover{background:#141410;}
+.step-num{
+  font-family:'Playfair Display',serif;font-size:64px;
+  font-weight:900;color:rgba(114,255,106,0.08);
+  line-height:1;margin-bottom:20px;
+}
+.step-icon{font-size:32px;margin-bottom:16px;}
+.step-title{
+  font-family:'Playfair Display',serif;font-size:22px;
+  color:var(--mist-white);margin-bottom:12px;
+}
+.step-desc{
+  font-family:'Lora',serif;font-size:14px;
+  color:var(--text-dim);line-height:1.8;
+}
+
+/* ── SEED RECOMMENDER ── */
+.recommend-section{background:var(--moss-deep);padding:100px 48px;}
+.recommend-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;margin-top:60px;}
+.filter-panel{display:flex;flex-direction:column;gap:24px;}
+.filter-group label{
+  font-family:'DM Mono',monospace;font-size:11px;
+  letter-spacing:2px;text-transform:uppercase;color:var(--leaf-glow);
+  display:block;margin-bottom:10px;
+}
+.filter-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{
+  font-family:'DM Mono',monospace;font-size:12px;
+  padding:8px 16px;border:1px solid var(--border-dim);
+  background:transparent;color:var(--text-dim);
+  cursor:pointer;transition:all 0.25s;letter-spacing:0.5px;
+}
+.chip:hover,.chip.active{
+  background:rgba(114,255,106,0.1);
+  border-color:var(--leaf-glow);color:var(--leaf-glow);
+}
+.seed-results{display:flex;flex-direction:column;gap:12px;}
+.seed-result-card{
+  background:var(--bark-dark);
+  border:1px solid var(--border-dim);
+  padding:20px 24px;
+  display:flex;align-items:center;gap:20px;
+  transition:all 0.3s;cursor:pointer;
+  animation:notifSlide 0.4s ease forwards;opacity:0;
+}
+.seed-result-card:nth-child(1){animation-delay:0s;}
+.seed-result-card:nth-child(2){animation-delay:0.1s;}
+.seed-result-card:nth-child(3){animation-delay:0.2s;}
+.seed-result-card:nth-child(4){animation-delay:0.3s;}
+.seed-result-card:hover{
+  background:rgba(114,255,106,0.05);
+  border-color:rgba(114,255,106,0.4);
+  transform:translateX(6px);
+}
+.seed-emoji{font-size:36px;}
+.seed-info{flex:1;}
+.seed-name{
+  font-family:'Playfair Display',serif;font-size:18px;
+  color:var(--mist-white);margin-bottom:4px;
+}
+.seed-meta{
+  font-family:'DM Mono',monospace;font-size:11px;
+  color:var(--text-dim);letter-spacing:0.5px;
+}
+.seed-badge{
+  font-family:'DM Mono',monospace;font-size:10px;
+  letter-spacing:1px;text-transform:uppercase;
+  padding:4px 10px;border:1px solid;
+}
+.badge-easy{color:#72FF6A;border-color:rgba(114,255,106,0.4);}
+.badge-med{color:var(--pollen-gold);border-color:rgba(232,197,71,0.4);}
+.badge-hard{color:var(--clay-red);border-color:rgba(181,72,31,0.4);}
+.empty-state{
+  font-family:'DM Mono',monospace;font-size:13px;
+  color:var(--text-dim);text-align:center;
+  padding:48px;border:1px dashed var(--border-dim);
+  letter-spacing:1px;
+}
+
+/* ── DASHBOARD PREVIEW ── */
+.dashboard-section{background:var(--bark-dark);padding:100px 48px;}
+.dashboard-preview{
+  display:grid;grid-template-columns:260px 1fr;
+  gap:2px;background:rgba(114,255,106,0.08);
+  border:1px solid var(--border-dim);
+  margin-top:60px;overflow:hidden;
+}
+.sidebar-preview{
+  background:var(--soil-black);padding:28px 20px;
+}
+.sidebar-logo{
+  font-family:'Playfair Display',serif;font-size:16px;
+  color:var(--leaf-glow);font-weight:700;
+  display:flex;align-items:center;gap:8px;margin-bottom:28px;
+}
+.nav-item{
+  font-family:'DM Mono',monospace;font-size:12px;
+  color:var(--text-dim);padding:10px 12px;
+  letter-spacing:0.5px;cursor:pointer;
+  transition:all 0.2s;display:flex;
+  justify-content:space-between;align-items:center;
+  margin-bottom:2px;
+}
+.nav-item:hover,.nav-item.active{
+  background:rgba(114,255,106,0.08);color:var(--leaf-glow);
+}
+.nav-badge{
+  background:var(--leaf-glow);color:var(--soil-black);
+  font-size:10px;padding:1px 6px;font-weight:600;
+}
+.sidebar-divider{height:1px;background:var(--border-dim);margin:20px 0;}
+.sidebar-plant{padding:4px 0;}
+.sidebar-plant-label{
+  font-family:'DM Mono',monospace;font-size:10px;
+  letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:12px;
+}
+.sidebar-plant-name{
+  font-family:'Playfair Display',serif;font-size:18px;
+  color:var(--mist-white);display:flex;align-items:center;gap:8px;margin-bottom:4px;
+}
+.sidebar-plant-days{
+  font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);margin-bottom:12px;
+}
+.progress-bar-wrap{background:rgba(255,255,255,0.08);height:4px;margin-bottom:8px;overflow:hidden;}
+.progress-bar-fill{
+  height:100%;background:var(--leaf-glow);
+  width:26%;transition:width 1.5s cubic-bezier(0.23,1,0.32,1);
+}
+.phase-tag{
+  font-family:'DM Mono',monospace;font-size:10px;
+  letter-spacing:1px;color:var(--leaf-glow);text-transform:uppercase;
+}
+
+.main-preview{background:#111108;padding:32px 36px;}
+.main-date{
+  font-family:'DM Mono',monospace;font-size:11px;
+  letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);
+  margin-bottom:8px;
+}
+.main-heading{
+  font-family:'Playfair Display',serif;font-size:26px;
+  color:var(--mist-white);margin-bottom:28px;font-weight:700;
+}
+.notif-card{
+  background:var(--bark-dark);
+  border-left:3px solid transparent;
+  padding:14px 18px;margin-bottom:8px;
+  display:flex;align-items:center;gap:16px;
+  transition:all 0.3s;
+}
+.notif-card.water{border-color:var(--water-blue);}
+.notif-card.fert{border-color:var(--fert-amber);}
+.notif-card.pest{border-color:var(--clay-red);}
+.notif-icon-wrap{font-size:20px;width:32px;text-align:center;}
+.notif-body-text{flex:1;}
+.notif-title-text{
+  font-family:'DM Mono',monospace;font-size:13px;
+  color:var(--mist-white);letter-spacing:0.3px;
+}
+.notif-day-tag{
+  font-family:'DM Mono',monospace;font-size:10px;
+  color:var(--text-dim);margin-top:3px;
+}
+.notif-done-btn{
+  font-family:'DM Mono',monospace;font-size:10px;
+  letter-spacing:1px;text-transform:uppercase;
+  border:1px solid var(--border-dim);color:var(--text-dim);
+  background:transparent;padding:5px 12px;cursor:pointer;
+  transition:all 0.2s;white-space:nowrap;
+}
+.notif-done-btn:hover{border-color:var(--leaf-glow);color:var(--leaf-glow);}
+.notif-done-btn.done{border-color:var(--leaf-glow);color:var(--leaf-glow);background:rgba(114,255,106,0.08);}
+
+.upcoming-title{
+  font-family:'DM Mono',monospace;font-size:11px;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-dim);margin:28px 0 14px;
+}
+.upcoming-item{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.upcoming-day{
+  font-family:'DM Mono',monospace;font-size:11px;
+  color:var(--leaf-glow);min-width:50px;letter-spacing:0.5px;
+}
+.upcoming-text{
+  font-family:'Lora',serif;font-size:13px;color:var(--text-dim);
+}
+
+.year-section-inner{margin-top:28px;}
+.year-label{
+  font-family:'DM Mono',monospace;font-size:11px;
+  letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;
+  display:flex;justify-content:space-between;
+}
+.year-bar-outer{background:rgba(255,255,255,0.06);height:6px;overflow:hidden;}
+.year-bar-fill{
+  height:100%;background:linear-gradient(90deg,var(--leaf-glow),var(--pollen-gold));
+  width:0%;transition:width 2s cubic-bezier(0.23,1,0.32,1);
+}
+
+/* ── NOTIFICATION TYPES ── */
+.notif-types-section{background:var(--soil-black);padding:100px 48px;}
+.notif-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  gap:2px;margin-top:60px;
+}
+.notif-type-card{
+  background:var(--bark-dark);padding:28px 20px;
+  text-align:center;transition:all 0.3s;cursor:default;
+  border-top:2px solid transparent;
+}
+.notif-type-card:hover{transform:translateY(-6px);background:#161610;}
+.notif-type-card.w:hover{border-top-color:var(--water-blue);}
+.notif-type-card.f:hover{border-top-color:var(--fert-amber);}
+.notif-type-card.p:hover{border-top-color:var(--clay-red);}
+.notif-type-card.s:hover{border-top-color:var(--pollen-gold);}
+.notif-type-card.h:hover{border-top-color:var(--leaf-glow);}
+.nt-icon{font-size:28px;margin-bottom:12px;}
+.nt-title{
+  font-family:'DM Mono',monospace;font-size:11px;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--mist-white);margin-bottom:8px;
+}
+.nt-desc{font-family:'Lora',serif;font-size:12px;color:var(--text-dim);line-height:1.6;}
+
+/* ── TIMELINE PHASES ── */
+.phases-section{background:var(--bark-dark);padding:100px 48px;}
+.phase-timeline{display:flex;gap:0;margin-top:60px;position:relative;}
+.phase-timeline::before{
+  content:'';position:absolute;top:20px;left:0;right:0;height:1px;
+  background:var(--border-dim);z-index:0;
+}
+.phase-item{flex:1;padding:0 12px;position:relative;z-index:1;}
+.phase-dot{
+  width:12px;height:12px;border-radius:50%;
+  background:var(--leaf-glow);
+  border:2px solid var(--bark-dark);
+  margin:0 auto 16px;
+  box-shadow:0 0 12px rgba(114,255,106,0.5);
+}
+.phase-dot.dim{background:var(--text-dim);box-shadow:none;}
+.phase-days{
+  font-family:'DM Mono',monospace;font-size:10px;
+  letter-spacing:1px;color:var(--leaf-glow);
+  text-align:center;margin-bottom:8px;
+}
+.phase-days.dim{color:var(--text-dim);}
+.phase-name{
+  font-family:'Playfair Display',serif;font-size:14px;
+  color:var(--mist-white);text-align:center;margin-bottom:8px;font-weight:700;
+}
+.phase-desc-small{
+  font-family:'Lora',serif;font-size:11px;
+  color:var(--text-dim);text-align:center;line-height:1.6;
+}
+
+/* ── FEATURES ── */
+.features-section{background:var(--moss-deep);padding:100px 48px;}
+.features-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:2px;margin-top:60px;
+}
+.feature-card{
+  background:var(--bark-dark);padding:36px 28px;
+  transition:all 0.3s;
+}
+.feature-card:hover{background:#1a1a13;}
+.feat-icon{
+  width:48px;height:48px;
+  border:1px solid var(--border-dim);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin-bottom:20px;
+}
+.feat-title{
+  font-family:'Playfair Display',serif;font-size:18px;
+  color:var(--mist-white);margin-bottom:10px;font-weight:700;
+}
+.feat-desc{font-family:'Lora',serif;font-size:13px;color:var(--text-dim);line-height:1.8;}
+
+/* ── CTA SECTION ── */
+.cta-section{
+  background:var(--soil-black);padding:120px 48px;
+  text-align:center;
+  border-top:1px solid var(--border-dim);
+}
+.cta-section h2{
+  font-family:'Playfair Display',serif;font-size:56px;
+  font-weight:900;color:var(--mist-white);
+  margin-bottom:16px;line-height:1.1;
+}
+.cta-section h2 em{color:var(--leaf-glow);font-style:normal;}
+.cta-section p{
+  font-family:'Lora',serif;font-size:17px;
+  color:var(--text-dim);margin-bottom:40px;line-height:1.8;
+}
+
+/* ── FOOTER ── */
+footer{
+  background:var(--bark-dark);padding:48px;
+  border-top:1px solid var(--border-dim);
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:20px;
+}
+.footer-logo{
+  font-family:'Playfair Display',serif;font-size:18px;
+  color:var(--leaf-glow);font-weight:700;
+  display:flex;align-items:center;gap:8px;
+}
+.footer-tagline{
+  font-family:'DM Mono',monospace;font-size:11px;
+  letter-spacing:1.5px;color:var(--text-dim);margin-top:4px;
+}
+.footer-links{
+  display:flex;gap:32px;list-style:none;flex-wrap:wrap;
+}
+.footer-links a{
+  font-family:'DM Mono',monospace;font-size:11px;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text-dim);text-decoration:none;transition:color 0.3s;
+}
+.footer-links a:hover{color:var(--leaf-glow);}
+.footer-copy{
+  font-family:'DM Mono',monospace;font-size:11px;
+  color:var(--text-dim);letter-spacing:0.5px;
+}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,0.85);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity 0.3s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{
+  background:var(--bark-dark);
+  border:1px solid var(--border-dim);
+  width:min(560px,95vw);max-height:90vh;overflow-y:auto;
+  padding:40px;position:relative;
+  transform:translateY(30px);transition:transform 0.3s;
+}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-close{
+  position:absolute;top:20px;right:20px;
+  background:transparent;border:none;
+  font-family:'DM Mono',monospace;font-size:18px;
+  color:var(--text-dim);cursor:pointer;
+  transition:color 0.2s;
+}
+.modal-close:hover{color:var(--leaf-glow);}
+.modal-title{
+  font-family:'Playfair Display',serif;font-size:28px;
+  color:var(--mist-white);margin-bottom:6px;font-weight:700;
+}
+.modal-sub{
+  font-family:'DM Mono',monospace;font-size:11px;
+  letter-spacing:1px;color:var(--leaf-glow);
+  text-transform:uppercase;margin-bottom:28px;
+}
+
+/* Wizard steps */
+.wizard-step{display:none;}
+.wizard-step.active{display:block;}
+.wizard-progress{
+  display:flex;gap:4px;margin-bottom:32px;
+}
+.w-dot{
+  flex:1;height:3px;background:rgba(255,255,255,0.1);transition:background 0.3s;
+}
+.w-dot.done{background:var(--leaf-glow);}
+.w-dot.active{background:rgba(114,255,106,0.5);}
+
+.w-label{
+  font-family:'DM Mono',monospace;font-size:11px;
+  letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);
+  margin-bottom:16px;
+}
+.soil-tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.soil-tile{
+  background:var(--soil-black);border:1px solid var(--border-dim);
+  padding:14px 16px;cursor:pointer;transition:all 0.2s;
+  display:flex;align-items:center;gap:10px;
+}
+.soil-tile:hover,.soil-tile.sel{
+  border-color:var(--leaf-glow);background:rgba(114,255,106,0.05);
+}
+.soil-dot-w{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.soil-text{font-family:'DM Mono',monospace;font-size:12px;color:var(--mist-white);}
+.soil-subtext{font-family:'Lora',serif;font-size:11px;color:var(--text-dim);margin-top:2px;}
+
+.season-tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;}
+.season-tile{
+  background:var(--soil-black);border:1px solid var(--border-dim);
+  padding:16px;cursor:pointer;transition:all 0.2s;text-align:center;
+}
+.season-tile:hover,.season-tile.sel{border-color:var(--leaf-glow);background:rgba(114,255,106,0.05);}
+.season-emoji{font-size:24px;margin-bottom:6px;}
+.season-text{font-family:'DM Mono',monospace;font-size:12px;color:var(--mist-white);}
+.climate-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+.climate-chip{
+  font-family:'DM Mono',monospace;font-size:11px;
+  padding:6px 14px;border:1px solid var(--border-dim);
+  background:transparent;color:var(--text-dim);
+  cursor:pointer;transition:all 0.2s;letter-spacing:0.5px;
+}
+.climate-chip:hover,.climate-chip.sel{
+  border-color:var(--leaf-glow);color:var(--leaf-glow);
+  background:rgba(114,255,106,0.08);
+}
+
+.seed-tile{
+  background:var(--soil-black);border:1px solid var(--border-dim);
+  padding:16px;cursor:pointer;transition:all 0.25s;
+  display:flex;align-items:center;gap:14px;margin-bottom:8px;
+}
+.seed-tile:hover,.seed-tile.sel{
+  border-color:var(--leaf-glow);background:rgba(114,255,106,0.05);
+  transform:translateX(4px);
+}
+.seed-tile-emoji{font-size:28px;}
+.seed-tile-name{font-family:'Playfair Display',serif;font-size:16px;color:var(--mist-white);}
+.seed-tile-meta{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);}
+
+.form-field{margin-bottom:20px;}
+.form-field label{
+  font-family:'DM Mono',monospace;font-size:11px;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text-dim);display:block;margin-bottom:8px;
+}
+.form-field input[type="date"]{
+  width:100%;background:var(--soil-black);
+  border:1px solid var(--border-dim);color:var(--mist-white);
+  padding:12px 14px;font-family:'DM Mono',monospace;font-size:13px;
+  outline:none;transition:border-color 0.2s;
+  color-scheme:dark;
+}
+.form-field input:focus{border-color:var(--leaf-glow);}
+
+.timeline-preview{margin-bottom:24px;}
+.tl-row{
+  display:flex;align-items:center;gap:12px;
+  padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.tl-dot-sm{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.tl-phase-name{font-family:'DM Mono',monospace;font-size:12px;color:var(--mist-white);flex:1;}
+.tl-date{font-family:'DM Mono',monospace;font-size:11px;color:var(--leaf-glow);}
+
+.btn-wiz{
+  font-family:'DM Mono',monospace;font-size:12px;
+  letter-spacing:1px;text-transform:uppercase;
+  padding:12px 24px;cursor:pointer;border:none;
+  transition:all 0.2s;
+}
+.btn-wiz-next{background:var(--leaf-glow);color:var(--soil-black);}
+.btn-wiz-next:hover{background:var(--mist-white);}
+.btn-wiz-back{background:transparent;border:1px solid var(--border-dim);color:var(--text-dim);}
+.btn-wiz-back:hover{border-color:var(--mist-white);color:var(--mist-white);}
+.wiz-actions{display:flex;gap:10px;justify-content:space-between;margin-top:8px;}
+.error-msg{
+  font-family:'DM Mono',monospace;font-size:11px;
+  color:var(--clay-red);margin-bottom:12px;letter-spacing:0.5px;
+  display:none;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  nav{padding:16px 24px;}
+  .nav-links{display:none;}
+  .hero{padding:100px 24px 60px;}
+  .how-section,.recommend-section,.dashboard-section,.notif-types-section,
+  .phases-section,.features-section,.cta-section{padding:70px 24px;}
+  .steps-grid{grid-template-columns:1fr;}
+  .recommend-grid{grid-template-columns:1fr;}
+  .dashboard-preview{grid-template-columns:1fr;}
+  .sidebar-preview{display:none;}
+  .notif-grid{grid-template-columns:repeat(2,1fr);}
+  .phase-timeline{flex-wrap:wrap;}
+  .phase-item{flex:0 0 33%;}
+  .features-grid{grid-template-columns:1fr;}
+  .hero-stats{flex-wrap:wrap;gap:24px;}
+  .cta-section h2{font-size:38px;}
+  footer{flex-direction:column;gap:24px;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><span>🌱</span> GrowOS</div>
+  <ul class="nav-links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#seeds">Seeds</a></li>
+    <li><a href="#dashboard">Dashboard</a></li>
+    <li><a href="#phases">Phases</a></li>
+  </ul>
+  <button class="nav-cta" onclick="openModal()">Start Growing →</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-eyebrow">Intelligent Plant Care Monitor</div>
+  <h1 class="anim-1">Grow <em>anything.</em><br>Know everything.</h1>
+  <p class="hero-sub anim-2">Smart plant care reminders for real gardeners. No sensors. No automation. Just you, your soil, and the right guidance — every day for a full year.</p>
+  <div class="hero-actions anim-3">
+    <button class="btn-primary" onclick="openModal()">Start Growing →</button>
+    <button class="btn-ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">See how it works</button>
+  </div>
+  <div class="hero-stats anim-4">
+    <div>
+      <div class="hero-stat-num">365</div>
+      <div class="hero-stat-label">Days of monitoring</div>
+    </div>
+    <div>
+      <div class="hero-stat-num">10+</div>
+      <div class="hero-stat-label">Care notification types</div>
+    </div>
+    <div>
+      <div class="hero-stat-num">100%</div>
+      <div class="hero-stat-label">Manual — no sensors</div>
+    </div>
+    <div>
+      <div class="hero-stat-num">40+</div>
+      <div class="hero-stat-label">Seeds in database</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<div class="diag"></div>
+<section class="how-section" id="how">
+  <div class="section-label">Process</div>
+  <div class="section-title">Three steps to a<br>thriving garden</div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-icon">🪨</div>
+      <div class="step-title">Enter your conditions</div>
+      <div class="step-desc">Tell us your soil type (loamy, sandy, clay, silt), current season, and local climate. This is everything we need to guide you precisely.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-icon">🌾</div>
+      <div class="step-title">Get your seed match</div>
+      <div class="step-desc">The system analyses your inputs and recommends the best seeds for your conditions. Pick one, plant it, and enter your planting date.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-icon">🔔</div>
+      <div class="step-title">Receive daily care guidance</div>
+      <div class="step-desc">For the next 365 days, GrowOS sends you timely notifications — watering, fertiliser, pruning, pest control, seasonal care, and harvest reminders.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SEED RECOMMENDER -->
+<div class="diag-rev"></div>
+<section class="recommend-section" id="seeds">
+  <div class="section-label">Interactive Demo</div>
+  <div class="section-title">Find your<br>perfect seed</div>
+  <div class="recommend-grid">
+    <div class="filter-panel">
+      <div class="filter-group">
+        <label>Soil type</label>
+        <div class="filter-chips" id="soilChips">
+          <button class="chip" data-group="soil" data-val="loamy" onclick="setFilter('soil',this)">Loamy</button>
+          <button class="chip" data-group="soil" data-val="sandy" onclick="setFilter('soil',this)">Sandy</button>
+          <button class="chip" data-group="soil" data-val="clay" onclick="setFilter('soil',this)">Clay</button>
+          <button class="chip" data-group="soil" data-val="silt" onclick="setFilter('soil',this)">Silt</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Season</label>
+        <div class="filter-chips">
+          <button class="chip" data-group="season" data-val="summer" onclick="setFilter('season',this)">☀️ Summer</button>
+          <button class="chip" data-group="season" data-val="winter" onclick="setFilter('season',this)">❄️ Winter</button>
+          <button class="chip" data-group="season" data-val="rainy" onclick="setFilter('season',this)">🌧️ Rainy</button>
+          <button class="chip" data-group="season" data-val="spring" onclick="setFilter('season',this)">🌸 Spring</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Climate</label>
+        <div class="filter-chips">
+          <button class="chip" data-group="climate" data-val="hot" onclick="setFilter('climate',this)">🔥 Hot</button>
+          <button class="chip" data-group="climate" data-val="cold" onclick="setFilter('climate',this)">🧊 Cold</button>
+          <button class="chip" data-group="climate" data-val="humid" onclick="setFilter('climate',this)">💧 Humid</button>
+          <button class="chip" data-group="climate" data-val="dry" onclick="setFilter('climate',this)">🌵 Dry</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div id="seedResults"><div class="empty-state">← Select soil, season & climate<br>to see seed recommendations</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD PREVIEW -->
+<section class="dashboard-section" id="dashboard">
+  <div class="section-label">Dashboard</div>
+  <div class="section-title">Your plant's<br>command centre</div>
+  <div class="section-desc">Everything you need to care for your plant — in one clean, focused view. Check today's tasks, upcoming care schedule, and your full year progress at a glance.</div>
+  <div class="dashboard-preview">
+    <div class="sidebar-preview">
+      <div class="sidebar-logo">🌱 GrowOS</div>
+      <div class="nav-item active">Dashboard</div>
+      <div class="nav-item">My Plants</div>
+      <div class="nav-item">Notifications <span class="nav-badge">3</span></div>
+      <div class="nav-item">Care Log</div>
+      <div class="nav-item">Settings</div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-plant">
+        <div class="sidebar-plant-label">Active Plant</div>
+        <div class="sidebar-plant-name">🍅 Tomato</div>
+        <div class="sidebar-plant-days">Day 23 of 90</div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="sidebarBar"></div></div>
+        <div class="phase-tag">● Vegetative</div>
+      </div>
+    </div>
+    <div class="main-preview">
+      <div class="main-date">Mon 12 May 2026</div>
+      <div class="main-heading">Today's Care</div>
+      <div class="notif-card water" id="nc1">
+        <div class="notif-icon-wrap">💧</div>
+        <div class="notif-body-text">
+          <div class="notif-title-text">Water your Tomato today</div>
+          <div class="notif-day-tag">WATER · Day 23 — check soil moisture first</div>
+        </div>
+        <button class="notif-done-btn" onclick="markDone(this)">Done ✓</button>
+      </div>
+      <div class="notif-card fert" id="nc2">
+        <div class="notif-icon-wrap">🌿</div>
+        <div class="notif-body-text">
+          <div class="notif-title-text">Organic fertilizer due today</div>
+          <div class="notif-day-tag">FERTILIZER · Day 15 — apply near root base</div>
+        </div>
+        <button class="notif-done-btn" onclick="markDone(this)">Done ✓</button>
+      </div>
+      <div class="notif-card pest" id="nc3">
+        <div class="notif-icon-wrap">🐛</div>
+        <div class="notif-body-text">
+          <div class="notif-title-text">Pest & disease inspection</div>
+          <div class="notif-day-tag">PEST CONTROL · Week 3 — check leaf undersides</div>
+        </div>
+        <button class="notif-done-btn" onclick="markDone(this)">Done ✓</button>
+      </div>
+      <div class="upcoming-title">Upcoming — Next 30 Days</div>
+      <div class="upcoming-item"><div class="upcoming-day">Day 30</div><div class="upcoming-text">🌱 Compost application — mix into topsoil</div></div>
+      <div class="upcoming-item"><div class="upcoming-day">Day 35</div><div class="upcoming-text">✂️ Light pruning — remove dead branches</div></div>
+      <div class="upcoming-item"><div class="upcoming-day">Day 42</div><div class="upcoming-text">🪴 Weed removal — clear around stem base</div></div>
+      <div class="upcoming-item"><div class="upcoming-day">Day 45</div><div class="upcoming-text">🧪 Nitrogen fertilizer — dilute before applying</div></div>
+      <div class="year-section-inner">
+        <div class="year-label"><span>Year Progress</span><span id="yearDays">23 / 365 days</span></div>
+        <div class="year-bar-outer"><div class="year-bar-fill" id="yearBar"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NOTIFICATION TYPES -->
+<section class="notif-types-section" id="notifications">
+  <div class="section-label">Notification Engine</div>
+  <div class="section-title">Every care task,<br>on time — every time</div>
+  <div class="notif-grid">
+    <div class="notif-type-card w">
+      <div class="nt-icon">💧</div>
+      <div class="nt-title">Water</div>
+      <div class="nt-desc">Daily or every N days based on your plant and climate</div>
+    </div>
+    <div class="notif-type-card f">
+      <div class="nt-icon">🌿</div>
+      <div class="nt-title">Fertiliser</div>
+      <div class="nt-desc">Organic, compost, nitrogen — scheduled by growth stage</div>
+    </div>
+    <div class="notif-type-card p">
+      <div class="nt-icon">🐛</div>
+      <div class="nt-title">Pest Control</div>
+      <div class="nt-desc">Regular inspections and neem oil application reminders</div>
+    </div>
+    <div class="notif-type-card s">
+      <div class="nt-icon">☀️</div>
+      <div class="nt-title">Sunlight</div>
+      <div class="nt-desc">Seasonal reminders to adjust your plant's sun exposure</div>
+    </div>
+    <div class="notif-type-card h">
+      <div class="nt-icon">🎉</div>
+      <div class="nt-title">Harvest</div>
+      <div class="nt-desc">Advance warning 5 days before your crop is ready</div>
+    </div>
+    <div class="notif-type-card w">
+      <div class="nt-icon">✂️</div>
+      <div class="nt-title">Pruning</div>
+      <div class="nt-desc">Timed cuts to improve shape, airflow, and yield</div>
+    </div>
+    <div class="notif-type-card f">
+      <div class="nt-icon">🪴</div>
+      <div class="nt-title">Weed Removal</div>
+      <div class="nt-desc">Prevent nutrient competition every 3 weeks</div>
+    </div>
+    <div class="notif-type-card p">
+      <div class="nt-icon">🪨</div>
+      <div class="nt-title">Soil Check</div>
+      <div class="nt-desc">Moisture, drainage, and topsoil aeration reminders</div>
+    </div>
+    <div class="notif-type-card s">
+      <div class="nt-icon">🌦️</div>
+      <div class="nt-title">Seasonal Care</div>
+      <div class="nt-desc">Month-change guidance to adapt your care routine</div>
+    </div>
+    <div class="notif-type-card h">
+      <div class="nt-icon">📋</div>
+      <div class="nt-title">Milestones</div>
+      <div class="nt-desc">Weekly growth check — height, colour, and health targets</div>
+    </div>
+  </div>
+</section>
+
+<!-- GROWTH PHASES -->
+<section class="phases-section" id="phases">
+  <div class="section-label">One-Year Cycle</div>
+  <div class="section-title">Seven phases.<br>Full-year guidance.</div>
+  <div class="phase-timeline">
+    <div class="phase-item">
+      <div class="phase-dot"></div>
+      <div class="phase-days">Day 0–10</div>
+      <div class="phase-name">Germination</div>
+      <div class="phase-desc-small">Daily water, warmth, no fertiliser yet</div>
+    </div>
+    <div class="phase-item">
+      <div class="phase-dot"></div>
+      <div class="phase-days">Day 10–30</div>
+      <div class="phase-name">Seedling</div>
+      <div class="phase-desc-small">Gentle water, first organic fertiliser at day 15</div>
+    </div>
+    <div class="phase-item">
+      <div class="phase-dot"></div>
+      <div class="phase-days">Day 30–60</div>
+      <div class="phase-name">Vegetative</div>
+      <div class="phase-desc-small">Regular water, nitrogen, weed removal, pest check</div>
+    </div>
+    <div class="phase-item">
+      <div class="phase-dot"></div>
+      <div class="phase-days">Day 60–75</div>
+      <div class="phase-name">Flowering</div>
+      <div class="phase-desc-small">Reduce nitrogen, add potassium, stake if needed</div>
+    </div>
+    <div class="phase-item">
+      <div class="phase-dot"></div>
+      <div class="phase-days">Day 75–85</div>
+      <div class="phase-name">Fruiting</div>
+      <div class="phase-desc-small">Minimal water, pest vigilance, sun check</div>
+    </div>
+    <div class="phase-item">
+      <div class="phase-dot dim"></div>
+      <div class="phase-days dim">Day 85–90</div>
+      <div class="phase-name">Pre-harvest</div>
+      <div class="phase-desc-small">Stop fertiliser, reduce water, inspect readiness</div>
+    </div>
+    <div class="phase-item">
+      <div class="phase-dot dim"></div>
+      <div class="phase-days dim">Day 90–365</div>
+      <div class="phase-name">Post-cycle</div>
+      <div class="phase-desc-small">Summary, option to replant, soil recovery guide</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section">
+  <div class="section-label">Features</div>
+  <div class="section-title">Everything a gardener<br>actually needs</div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feat-icon">🪨</div>
+      <div class="feat-title">Soil-based seed recommendation</div>
+      <div class="feat-desc">Matches seeds to your exact soil composition for the highest success rate — loamy, sandy, clay, or silt.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">🌦️</div>
+      <div class="feat-title">Season & climate analysis</div>
+      <div class="feat-desc">Recommendations adapt to your local season and climate conditions — hot, cold, humid, or dry.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">📅</div>
+      <div class="feat-title">Planting date tracking</div>
+      <div class="feat-desc">Enter your planting date and the entire year-long schedule is automatically calculated from day zero.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">💧</div>
+      <div class="feat-title">Intelligent water reminders</div>
+      <div class="feat-desc">Watering frequency adapts to the plant type, current season, and climate — no overwatering, no underwatering.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">🌿</div>
+      <div class="feat-title">Fertiliser schedule</div>
+      <div class="feat-desc">Organic, compost, nitrogen — the right fertiliser at the right growth stage, with clear application instructions.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">📊</div>
+      <div class="feat-title">Year-long care log</div>
+      <div class="feat-desc">Track every care activity manually. At the end of the year, review a complete summary of your plant's growth journey.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="section-label" style="justify-content:center;">Ready to grow</div>
+  <h2>Your garden.<br><em>Perfectly timed.</em></h2>
+  <p>Start your first plant today — no hardware, no sensors, no subscription.<br>Just great guidance, every single day.</p>
+  <button class="btn-primary" onclick="openModal()">Start Growing — It's Free →</button>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-logo">🌱 GrowOS</div>
+    <div class="footer-tagline">Grow smarter. No sensors needed.</div>
+  </div>
+  <ul class="footer-links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#seeds">Seeds</a></li>
+    <li><a href="#dashboard">Dashboard</a></li>
+    <li><a href="#phases">Phases</a></li>
+  </ul>
+  <div class="footer-copy">© 2026 GrowOS — 100% Manual. 100% Yours.</div>
+</footer>
+
+<!-- SETUP MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title" id="modalTitle">Setup your plant</div>
+    <div class="modal-sub" id="modalSub">Step 1 of 4 — Soil Type</div>
+    <div class="wizard-progress">
+      <div class="w-dot active" id="wd0"></div>
+      <div class="w-dot" id="wd1"></div>
+      <div class="w-dot" id="wd2"></div>
+      <div class="w-dot" id="wd3"></div>
+    </div>
+
+    <!-- Step 1: Soil -->
+    <div class="wizard-step active" id="ws0">
+      <div class="w-label">Select your soil type</div>
+      <div class="soil-tiles">
+        <div class="soil-tile" onclick="wSelect('soil','loamy',this)"><div class="soil-dot-w" style="background:#8B5E3C;"></div><div><div class="soil-text">Loamy</div><div class="soil-subtext">Best balance of drainage & nutrients</div></div></div>
+        <div class="soil-tile" onclick="wSelect('soil','sandy',this)"><div class="soil-dot-w" style="background:#D2B48C;"></div><div><div class="soil-text">Sandy</div><div class="soil-subtext">Fast draining, low in nutrients</div></div></div>
+        <div class="soil-tile" onclick="wSelect('soil','clay',this)"><div class="soil-dot-w" style="background:#A0522D;"></div><div><div class="soil-text">Clay</div><div class="soil-subtext">Holds moisture well, dense</div></div></div>
+        <div class="soil-tile" onclick="wSelect('soil','silt',this)"><div class="soil-dot-w" style="background:#B0A090;"></div><div><div class="soil-text">Silt</div><div class="soil-subtext">Fertile, smooth texture</div></div></div>
+      </div>
+      <div class="error-msg" id="e0">Please select a soil type.</div>
+      <div class="wiz-actions"><div></div><button class="btn-wiz btn-wiz-next" onclick="wNext(0)">Next →</button></div>
+    </div>
+
+    <!-- Step 2: Season + Climate -->
+    <div class="wizard-step" id="ws1">
+      <div class="w-label">Season</div>
+      <div class="season-tiles" id="seasonTiles">
+        <div class="season-tile" onclick="wSelect('season','summer',this)"><div class="season-emoji">☀️</div><div class="season-text">Summer</div></div>
+        <div class="season-tile" onclick="wSelect('season','winter',this)"><div class="season-emoji">❄️</div><div class="season-text">Winter</div></div>
+        <div class="season-tile" onclick="wSelect('season','rainy',this)"><div class="season-emoji">🌧️</div><div class="season-text">Rainy</div></div>
+        <div class="season-tile" onclick="wSelect('season','spring',this)"><div class="season-emoji">🌸</div><div class="season-text">Spring</div></div>
+      </div>
+      <div class="w-label" style="margin-top:16px;">Climate</div>
+      <div class="climate-chips">
+        <button class="climate-chip" onclick="wSelect('climate','hot',this)">🔥 Hot</button>
+        <button class="climate-chip" onclick="wSelect('climate','cold',this)">🧊 Cold</button>
+        <button class="climate-chip" onclick="wSelect('climate','humid',this)">💧 Humid</button>
+        <button class="climate-chip" onclick="wSelect('climate','dry',this)">🌵 Dry</button>
+      </div>
+      <div class="error-msg" id="e1">Please select season and climate.</div>
+      <div class="wiz-actions">
+        <button class="btn-wiz btn-wiz-back" onclick="wBack(1)">← Back</button>
+        <button class="btn-wiz btn-wiz-next" onclick="wNext(1)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Seed selection -->
+    <div class="wizard-step" id="ws2">
+      <div class="w-label">Recommended seeds for your profile</div>
+      <div id="wizSeedList"></div>
+      <div class="error-msg" id="e2">Please select a seed.</div>
+      <div class="wiz-actions">
+        <button class="btn-wiz btn-wiz-back" onclick="wBack(2)">← Back</button>
+        <button class="btn-wiz btn-wiz-next" onclick="wNext(2)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Planting date -->
+    <div class="wizard-step" id="ws3">
+      <div id="confirmSeed" style="margin-bottom:20px;"></div>
+      <div class="form-field">
+        <label>Date of planting</label>
+        <input type="date" id="plantDate" onchange="updateTLPreview()" />
+      </div>
+      <div class="timeline-preview" id="tlPreview"></div>
+      <div class="error-msg" id="e3">Please enter your planting date.</div>
+      <div class="wiz-actions">
+        <button class="btn-wiz btn-wiz-back" onclick="wBack(3)">← Back</button>
+        <button class="btn-wiz btn-wiz-next" onclick="wFinish()">🌱 Start Monitoring</button>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div class="wizard-step" id="ws4">
+      <div style="text-align:center;padding:20px 0;">
+        <div style="font-size:56px;margin-bottom:16px;">🎉</div>
+        <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--mist-white);margin-bottom:8px;">Monitoring started!</div>
+        <div id="successMsg" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--leaf-glow);letter-spacing:1px;margin-bottom:24px;line-height:1.8;"></div>
+        <div style="font-family:'Lora',serif;font-size:14px;color:var(--text-dim);line-height:1.8;margin-bottom:28px;">Your plant care schedule has been created. You'll receive daily notifications for watering, fertilising, pruning, and more — for the full year.</div>
+        <button class="btn-wiz btn-wiz-next" onclick="closeModal()" style="width:100%;">Back to GrowOS ✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── PARTICLES ──
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+
+function resizeCanvas(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resizeCanvas();window.addEventListener('resize',resizeCanvas);
+
+class Particle{
+  constructor(){this.reset();}
+  reset(){
+    this.x=Math.random()*W;this.y=Math.random()*H+H;
+    this.size=Math.random()*4+2;
+    this.speed=Math.random()*0.6+0.2;
+    this.drift=Math.random()*0.4-0.2;
+    this.opacity=Math.random()*0.5+0.1;
+    this.rot=Math.random()*Math.PI*2;
+    this.rotSpeed=Math.random()*0.02-0.01;
+  }
+  update(){
+    this.y-=this.speed;this.x+=this.drift;
+    this.rot+=this.rotSpeed;
+    if(this.y<-20)this.reset();
+  }
+  draw(){
+    ctx.save();
+    ctx.globalAlpha=this.opacity;
+    ctx.translate(this.x,this.y);ctx.rotate(this.rot);
+    ctx.fillStyle='#72FF6A';
+    ctx.beginPath();
+    ctx.ellipse(0,0,this.size,this.size*2,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+for(let i=0;i<60;i++)particles.push(new Particle());
+function animParticles(){
+  ctx.clearRect(0,0,W,H);
+  particles.forEach(p=>{p.update();p.draw();});
+  requestAnimationFrame(animParticles);
+}
+animParticles();
+
+// ── YEAR BAR ──
+setTimeout(()=>{
+  document.getElementById('yearBar').style.width='6.3%';
+},800);
+
+// ── MARK DONE ──
+function markDone(btn){
+  btn.classList.toggle('done');
+  if(btn.classList.contains('done'))btn.textContent='✓ Done';
+  else btn.textContent='Done ✓';
+}
+
+// ── SEED RECOMMENDER (demo) ──
+const SEED_DB={
+  loamy:{rainy:{humid:[{n:'Tomato',e:'🍅',d:90,w:'Every 2 days',diff:'easy'},{n:'Chili',e:'🌶️',d:75,w:'Every 3 days',diff:'med'},{n:'Spinach',e:'🥬',d:45,w:'Every day',diff:'easy'}]},
+    summer:{hot:[{n:'Okra',e:'🌿',d:70,w:'Daily',diff:'easy'},{n:'Cucumber',e:'🥒',d:60,w:'Daily',diff:'easy'},{n:'Watermelon',e:'🍉',d:90,w:'Daily',diff:'med'}]},
+    winter:{cold:[{n:'Cabbage',e:'🥬',d:90,w:'Every 3 days',diff:'easy'},{n:'Carrot',e:'🥕',d:80,w:'Every 2 days',diff:'easy'},{n:'Peas',e:'🫛',d:70,w:'Every 2 days',diff:'easy'}]}},
+  sandy:{summer:{dry:[{n:'Groundnut',e:'🥜',d:120,w:'Every 4 days',diff:'easy'},{n:'Millet',e:'🌾',d:90,w:'Every 5 days',diff:'easy'},{n:'Sesame',e:'🌱',d:80,w:'Weekly',diff:'easy'}]},
+    rainy:{humid:[{n:'Cowpea',e:'🫘',d:65,w:'Every 3 days',diff:'easy'},{n:'Sweet Potato',e:'🍠',d:120,w:'Every 3 days',diff:'med'}]},
+    winter:{dry:[{n:'Radish',e:'🌱',d:40,w:'Every 2 days',diff:'easy'},{n:'Garlic',e:'🧄',d:180,w:'Weekly',diff:'hard'},{n:'Onion',e:'🧅',d:150,w:'Every 5 days',diff:'med'}]}},
+  clay:{winter:{cold:[{n:'Wheat',e:'🌾',d:130,w:'Every 3 days',diff:'med'},{n:'Peas',e:'🫛',d:70,w:'Every 2 days',diff:'easy'},{n:'Mustard',e:'🌿',d:90,w:'Weekly',diff:'easy'}]},
+    rainy:{humid:[{n:'Paddy',e:'🌾',d:110,w:'Daily (flood)',diff:'hard'},{n:'Bitter Gourd',e:'🥒',d:80,w:'Daily',diff:'med'}]}},
+  silt:{spring:{humid:[{n:'Lettuce',e:'🥬',d:50,w:'Every 2 days',diff:'easy'},{n:'Basil',e:'🌿',d:60,w:'Every 2 days',diff:'easy'},{n:'Mint',e:'🌱',d:90,w:'Every 2 days',diff:'easy'}]},
+    summer:{hot:[{n:'Eggplant',e:'🍆',d:80,w:'Daily',diff:'med'},{n:'Pepper',e:'🫑',d:75,w:'Every 2 days',diff:'med'},{n:'Beans',e:'🫘',d:60,w:'Every 2 days',diff:'easy'}]}}
+};
+
+let demoFilters={soil:'',season:'',climate:''};
+function setFilter(group,el){
+  document.querySelectorAll(`.chip[data-group="${group}"]`).forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  demoFilters[group]=el.dataset.val;
+  renderSeeds();
+}
+function renderSeeds(){
+  const {soil,season,climate}=demoFilters;
+  if(!soil||!season||!climate){
+    document.getElementById('seedResults').innerHTML='<div class="empty-state">← Select all three filters<br>to see seed recommendations</div>';
+    return;
+  }
+  const byClimate=SEED_DB[soil]?.[season]?.[climate]||
+    (SEED_DB[soil]?.[season]?Object.values(SEED_DB[soil][season])[0]:null)||
+    (SEED_DB[soil]?Object.values(Object.values(SEED_DB[soil])[0])[0]:null)||[];
+  if(!byClimate.length){
+    document.getElementById('seedResults').innerHTML='<div class="empty-state">No seeds found for this combination.<br>Try different filters.</div>';
+    return;
+  }
+  document.getElementById('seedResults').innerHTML=byClimate.map(s=>`
+    <div class="seed-result-card">
+      <div class="seed-emoji">${s.e}</div>
+      <div class="seed-info">
+        <div class="seed-name">${s.n}</div>
+        <div class="seed-meta">${s.d} days · Water ${s.w}</div>
+      </div>
+      <div class="seed-badge badge-${s.diff}">${s.diff.toUpperCase()}</div>
+    </div>
+  `).join('');
+}
+
+// ── MODAL / WIZARD ──
+let wState={soil:'',season:'',climate:'',seed:null,date:''};
+let wStep=0;
+
+function openModal(){
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  showWStep(0);
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow='';
+  wState={soil:'',season:'',climate:'',seed:null,date:''};
+  wStep=0;
+}
+function handleOverlayClick(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
+
+const stepTitles=['Setup your plant','Season & climate','Choose your seed','Plant it!',''];
+const stepSubs=['Step 1 of 4 — Soil Type','Step 2 of 4 — Season & Climate','Step 3 of 4 — Seed Selection','Step 4 of 4 — Planting Date',''];
+
+function showWStep(n){
+  document.querySelectorAll('.wizard-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('ws'+n).classList.add('active');
+  for(let i=0;i<4;i++){
+    const d=document.getElementById('wd'+i);
+    d.className='w-dot '+(i<n?'done':i===n?'active':'');
+  }
+  document.getElementById('modalTitle').textContent=stepTitles[n]||'';
+  document.getElementById('modalSub').textContent=stepSubs[n]||'';
+  wStep=n;
+}
+
+function wSelect(key,val,el){
+  const group=el.closest('.soil-tiles,.season-tiles,.climate-chips');
+  if(group)group.querySelectorAll('.soil-tile,.season-tile,.climate-chip').forEach(e=>{
+    e.classList.remove('sel');
+  });
+  el.classList.add('sel');
+  wState[key]=val;
+}
+
+function showError(id){
+  const e=document.getElementById(id);e.style.display='block';
+  setTimeout(()=>e.style.display='none',2500);
+}
+
+function wNext(step){
+  if(step===0){
+    if(!wState.soil){showError('e0');return;}
+    showWStep(1);
+  } else if(step===1){
+    if(!wState.season||!wState.climate){showError('e1');return;}
+    buildWizSeeds();showWStep(2);
+  } else if(step===2){
+    if(!wState.seed){showError('e2');return;}
+    buildConfirm();showWStep(3);
+  }
+}
+function wBack(step){showWStep(step-1);}
+
+function buildWizSeeds(){
+  const {soil,season,climate}=wState;
+  const seeds=SEED_DB[soil]?.[season]?.[climate]||
+    (SEED_DB[soil]?.[season]?Object.values(SEED_DB[soil][season])[0]:null)||
+    [{n:'Tomato',e:'🍅',d:90,w:'Every 2 days',diff:'easy'},
+     {n:'Chili',e:'🌶️',d:75,w:'Every 3 days',diff:'med'}];
+  document.getElementById('wizSeedList').innerHTML=seeds.map(s=>`
+    <div class="seed-tile" onclick="selectWizSeed(${JSON.stringify(s).replace(/"/g,"'")},this)">
+      <div class="seed-tile-emoji">${s.e}</div>
+      <div>
+        <div class="seed-tile-name">${s.n}</div>
+        <div class="seed-tile-meta">${s.d} days · ${s.w}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectWizSeed(s,el){
+  document.querySelectorAll('.seed-tile').forEach(t=>t.classList.remove('sel'));
+  el.classList.add('sel');
+  wState.seed={name:s.n,emoji:s.e,days:s.d,water:s.w};
+}
+
+function buildConfirm(){
+  const s=wState.seed;
+  document.getElementById('confirmSeed').innerHTML=`
+    <div style="background:rgba(114,255,106,0.06);border:1px solid rgba(114,255,106,0.2);padding:16px 20px;display:flex;align-items:center;gap:16px;margin-bottom:4px;">
+      <span style="font-size:36px;">${s.emoji}</span>
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--mist-white);">${s.name}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--leaf-glow);letter-spacing:1px;margin-top:4px;">${s.days}-day cycle · Water ${s.water}</div>
+      </div>
+    </div>
+  `;
+  const today=new Date();
+  const dd=today.toISOString().split('T')[0];
+  document.getElementById('plantDate').value=dd;
+  updateTLPreview();
+}
+
+function updateTLPreview(){
+  const dateVal=document.getElementById('plantDate').value;
+  const s=wState.seed;
+  if(!dateVal||!s)return;
+  const start=new Date(dateVal);
+  const phases=[
+    {name:'Germination',offset:0,color:'#72FF6A'},
+    {name:'Seedling',offset:Math.round(s.days*0.1),color:'#3A9BD5'},
+    {name:'Vegetative',offset:Math.round(s.days*0.3),color:'#D4822A'},
+    {name:'Flowering',offset:Math.round(s.days*0.65),color:'#E8C547'},
+    {name:'Harvest',offset:s.days,color:'#B5481F'}
+  ];
+  document.getElementById('tlPreview').innerHTML=phases.map(p=>{
+    const d=new Date(start);d.setDate(d.getDate()+p.offset);
+    return `<div class="tl-row">
+      <div class="tl-dot-sm" style="background:${p.color};"></div>
+      <div class="tl-phase-name">${p.name}</div>
+      <div class="tl-date">${d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</div>
+    </div>`;
+  }).join('');
+}
+
+function wFinish(){
+  const date=document.getElementById('plantDate').value;
+  if(!date){showError('e3');return;}
+  wState.date=date;
+  const s=wState.seed;
+  const d=new Date(date);
+  const harvest=new Date(d);harvest.setDate(d.getDate()+s.days);
+  document.getElementById('successMsg').innerHTML=
+    `${s.emoji} ${s.name} planted on ${d.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}<br>` +
+    `EXPECTED HARVEST · ${harvest.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}<br>` +
+    `MONITORING PERIOD · 365 days`;
+  showWStep(4);
+}
+
+// ── INTERSECTION OBSERVER for year bar ──
+const yearBarEl=document.getElementById('yearBar');
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){yearBarEl.style.width='6.3%';}});
+},{threshold:0.5});
+if(yearBarEl)obs.observe(yearBarEl);
+</script>
+</body>
+</html>
